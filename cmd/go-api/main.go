@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/VarunSharma3520/go-api/internal/config"
-	"github.com/VarunSharma3520/go-api/internal/routes"
 	"log"
 	"net/http"
+
+	"github.com/VarunSharma3520/go-api/internal/config"
+	"github.com/VarunSharma3520/go-api/internal/db"
+	"github.com/VarunSharma3520/go-api/internal/routes"
 )
 
 func main() {
@@ -27,6 +29,10 @@ func main() {
 			return
 		}
 	})
+
+	if _, err := db.Connect(); err != nil {
+		log.Fatalf("❌ Database connection failed: %v", err)
+	}
 
 	log.Println("✅ Server started on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", mux); err != nil {
