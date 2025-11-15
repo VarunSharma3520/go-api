@@ -6,6 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
+var Client *mongo.Client
 
 func Connect() (*mongo.Client, error) {
 	clientOptions := options.Client().ApplyURI(config.GetConfig().MongoURI)

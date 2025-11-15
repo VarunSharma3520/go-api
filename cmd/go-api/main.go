@@ -30,7 +30,8 @@ func main() {
 		}
 	})
 
-	if _, err := db.Connect(); err != nil {
+	var err error
+	if db.Client, err = db.Connect(); err != nil {
 		log.Fatalf("❌ Database connection failed: %v", err)
 	}
 
