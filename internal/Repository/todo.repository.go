@@ -3,113 +3,75 @@ package repository
 import (
 	"context"
 	"errors"
+	// "log"
 	"time"
 
 	"github.com/VarunSharma3520/go-api/internal/db"
-	"github.com/VarunSharma3520/go-api/internal/types"
+	"github.com/VarunSharma3520/go-api/internal/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-var (
-	ErrNotFound = errors.New("todo not found")
-)
-
-type TodoRepository struct {
-	collection *mongo.Collection
-}
-
-func NewTodoRepository(dbName, collName string) *TodoRepository {
-	// assumes db.Client is already initialized
-	return &TodoRepository{
-		collection: db.Client.Database(dbName).Collection(collName),
-	}
-}
-
-// Insert a new todo
-func (r *TodoRepository) Insert(ctx context.Context, todo *types.Todo) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func CreateTodo(todo models.Todo) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
-
-	_, err := r.collection.InsertOne(ctx, todo)
+	collection := db.Client.Database("todo").Collection("todos")
+	_, err := collection.InsertOne(ctx, todo)
 	return err
 }
 
-// Find returns todos matching non-empty fields of the filter.
-// supports pagination via skip and limit (int values)
-func (r *TodoRepository) Find(ctx context.Context, filter *types.Todo, skip, limit int) ([]types.Todo, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func ReadTodo(skip int, limit int) ([]models.Todo, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 
-	bfilter := bson.M{}
-	if filter != nil {
-		if filter.UserId != "" {
-			bfilter["userId"] = filter.UserId
-		}
-		if filter.Title != "" {
-			bfilter["title"] = filter.Title
-		}
-		// add more filters as needed
-	}
-
-	findOptions := options.Find()
-	if skip > 0 {
-		findOptions.SetSkip(int64(skip))
-	}
-	if limit > 0 {
-		findOptions.SetLimit(int64(limit))
-	}
-
-	cur, err := r.collection.Find(ctx, bfilter, findOptions)
+	collection := db.Client.Database("todo").Collection("todos")
+	filter := bson.M{}
+	opts := options.Find().SetSkip(int64(skip)).SetLimit(int64(limit))
+	cursor, err := collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, err
 	}
-	defer cur.Close(ctx)
+	defer cursor.Close(ctx)
 
-	var results []types.Todo
-	if err := cur.All(ctx, &results); err != nil {
+	var results []models.Todo
+	if err := cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
+
 	return results, nil
 }
 
-// Update by title (you can change to use ID or other unique key)
-func (r *TodoRepository) UpdateByTitle(ctx context.Context, title string, todo *types.Todo) error {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
+func PatchTodo(todo models.Todo) error {
+    ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+    defer cancel()
 
-	filter := bson.M{"title": title}
-	update := bson.M{"$set": bson.M{
-		"userId":      todo.UserId,
-		"title":       todo.Title,
-		"description": todo.Description,
-		"reminder":    todo.Reminder,
-	}}
+    collection := db.Client.Database("todo").Collection("todos")
 
-	res, err := r.collection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return err
-	}
-	if res.MatchedCount == 0 {
-		return ErrNotFound
-	}
-	return nil
+    // Filter by title
+    filter := bson.M{"title": todo.Title}
+
+    // Build update document dynamically (PATCH behavior)
+    update := bson.M{}
+    if todo.Description != "" {
+        update["description"] = todo.Description
+    }
+
+
+    if len(update) == 0 {
+        return errors.New("no fields to update")
+    }
+
+    _, err := collection.UpdateOne(ctx, filter, bson.M{"$set": update})
+    return err
 }
 
-// Delete by title and return deleted document
-func (r *TodoRepository) DeleteByTitle(ctx context.Context, title string) (*types.Todo, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
 
-	filter := bson.M{"title": title}
-	var deleted types.Todo
-	err := r.collection.FindOneAndDelete(ctx, filter).Decode(&deleted)
-	if err == mongo.ErrNoDocuments {
-		return nil, ErrNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &deleted, nil
+func DeleteTodo(todo models.Todo) error {
+    ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+    defer cancel()
+    collection := db.Client.Database("todo").Collection("todos")
+    filter := bson.M{"title": todo.Title}
+    _, err := collection.DeleteOne(ctx, filter)
+    return err
 }
+

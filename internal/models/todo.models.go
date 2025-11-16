@@ -1,20 +1,15 @@
 package models
 
 import (
-	"context"
-	"fmt"
-	"time"
-
-	"github.com/VarunSharma3520/go-api/internal/db"
-	"github.com/VarunSharma3520/go-api/internal/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func InsertTodo(todo types.Todo) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	collection := db.Client.Database("todo").Collection("todos")
-	_, err := collection.InsertOne(ctx, todo)
-	fmt.Println("Inserted Todo",collection)
-	return err
+type Todo struct {
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	UserId      string             `json:"userId" bson:"userId"`
+	Title       string             `json:"title" bson:"title"`
+	Description string             `json:"description" bson:"description"`
+	Reminder    primitive.DateTime `json:"reminder" bson:"reminder"`
+	CreatedAt   primitive.DateTime `json:"createdAt" bson:"createdAt"`
+	UpdatedAt   primitive.DateTime `json:"updatedAt" bson:"updatedAt"`
 }

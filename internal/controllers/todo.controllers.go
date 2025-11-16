@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	// "log"
 	"net/http"
 
 	"github.com/VarunSharma3520/go-api/internal/config"
@@ -34,7 +34,7 @@ func CreateTodoController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("✅ Received todo Data: %+v", todo)
+	// log.Printf("✅ Received todo Data: %+v", todo)
 
 	services.CreateTodoService(&todo)
 	json.NewEncoder(w).Encode(&config.Response{
