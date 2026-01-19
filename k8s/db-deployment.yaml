@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:8
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 27017
+
+          env:
+            - name: DBNAME 
+              valueFrom:
+                configMapKeyRef:
+                  name: go-api-config
+                  key: DBNAME
+
+            # optional (recommended for prod)
+            # - name: MONGO_INITDB_ROOT_USERNAME
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: mongo-secret
+            #       key: MONGO_USER
+            #
+            # - name: MONGO_INITDB_ROOT_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: mongo-secret
+            #       key: MONGO_PASSWORD
+
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: go-api-pvc

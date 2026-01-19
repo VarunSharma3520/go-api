@@ -1,0 +1,30 @@
+services:
+  go-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      MONGO_URI: mongodb://mongo:27017/mydb
+      ENV: development
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    networks:
+      - my-network
+
+  mongo:
+    image: mongo:8-noble
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - my-network
+
+volumes:
+  mongo-data:
+
+networks:
+  my-network:
+    driver: bridge
+

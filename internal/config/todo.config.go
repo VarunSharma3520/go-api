@@ -22,7 +22,7 @@ type Response struct {
 func GetConfig() Config {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+    log.Println(".env file not found, using environment variables")
 	}
 
 	cfg := Config{

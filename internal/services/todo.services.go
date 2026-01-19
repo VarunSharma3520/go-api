@@ -45,7 +45,7 @@ func ReadTodoService(todo *types.Todo, skip string, limit string) []models.Todo 
 			log.Println("ReadTodoService: invalid limit, using default 5:", err)
 		}
 	}
-
+	log.Println("ReadTodoService: using skip =", skipInt, "limit =", limitInt," from services")
 	result, err := repository.ReadTodo(skipInt, limitInt)
 	if err != nil {
 		log.Println("ReadTodoService: repository read error:", err)

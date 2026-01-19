@@ -13,7 +13,7 @@ import (
 )
 
 func CreateTodo(todo models.Todo) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 5000*time.Millisecond)
 	defer cancel()
 	collection := db.Client.Database("todo").Collection("todos")
 	_, err := collection.InsertOne(ctx, todo)
@@ -21,7 +21,7 @@ func CreateTodo(todo models.Todo) error {
 }
 
 func ReadTodo(skip int, limit int) ([]models.Todo, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 5000*time.Millisecond)
 	defer cancel()
 
 	collection := db.Client.Database("todo").Collection("todos")
@@ -42,7 +42,7 @@ func ReadTodo(skip int, limit int) ([]models.Todo, error) {
 }
 
 func PatchTodo(todo models.Todo) error {
-    ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+    ctx, cancel := context.WithTimeout(context.Background(), 5000*time.Millisecond)
     defer cancel()
 
     collection := db.Client.Database("todo").Collection("todos")
@@ -67,7 +67,7 @@ func PatchTodo(todo models.Todo) error {
 
 
 func DeleteTodo(todo models.Todo) error {
-    ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+    ctx, cancel := context.WithTimeout(context.Background(), 5000*time.Millisecond)
     defer cancel()
     collection := db.Client.Database("todo").Collection("todos")
     filter := bson.M{"title": todo.Title}

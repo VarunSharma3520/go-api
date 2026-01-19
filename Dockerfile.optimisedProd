@@ -1,0 +1,32 @@
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /src
+
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
+# Cache dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source
+COPY . .
+
+# Build with security & size flags
+RUN go build \
+    -trimpath \
+    -ldflags="-s -w" \
+    -o app ./cmd/go-api/main.go
+
+FROM gcr.io/distroless/static-debian12:nonroot
+
+WORKDIR /app
+
+COPY --from=builder /src/app /app/app
+
+EXPOSE 8080
+
+USER nonroot
+
+ENTRYPOINT ["/app/app"]

@@ -1,0 +1,18 @@
+services:
+  go-api:
+    image: golang:1.25
+    container_name: go-api
+    working_dir: /app
+    volumes:
+      - .:/app            
+      - go-mod-cache:/go/pkg/mod
+    ports:
+      - 8080:8080
+    command: /bin/sh        
+    tty: true
+    stdin_open: true
+    environment:
+      - GO111MODULE=on
+
+volumes:
+  go-mod-cache:

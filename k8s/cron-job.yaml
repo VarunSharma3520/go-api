@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongo-backup
+spec:
+  schedule: "1 * * * *" # daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: mongo:7
+              envFrom:
+                - secretRef:
+                    name: go-api-secret
+              command:
+                - sh
+                - -c
+                - |
+                  mongodump \
+                    --uri="mongodb://$MONGO_ROOT_USERNAME:$MONGO_ROOT_PASSWORD@mongo-0.mongo:27017/admin?replicaSet=rs0" \
+                    --archive=/dump.archive \
+                    --gzip 
+
+              # command:
+              #   - sh
+              #   - -c
+              #   - |
+              #     mongodump \
+              #       --uri="mongodb://$MONGO_ROOT_USERNAME:$MONGO_ROOT_PASSWORD@mongo-0.mongo:27017/admin?replicaSet=rs0" \
+              #       --archive=/dump.archive \
+              #       --gzip && \
+              #     aws s3 cp /dump.archive \
+              #       s3://$S3_BUCKET/mongo-$(date +%F).archive
