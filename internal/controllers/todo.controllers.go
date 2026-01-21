@@ -58,7 +58,7 @@ func ReadTodoController(w http.ResponseWriter, r *http.Request) {
 	limit := r.URL.Query().Get("limit")
 	json.NewEncoder(w).Encode(config.Response{
 		Status:  http.StatusText(http.StatusOK),
-		Message: "Todo fetched successfully",
+		Message: "Todos fetched successfully",
 		Data:    services.ReadTodoService(&types.Todo{}, skip, limit),
 	})
 }
